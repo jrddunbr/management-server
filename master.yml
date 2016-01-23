@@ -1,0 +1,23 @@
+VM:
+    Maintainers:
+        Jared Dunbar:
+            email: jrddunbr@gmail.com
+            phone: 000-000-0000
+        Name:
+            email: xyz@mail.com
+    Names:
+        Felix
+        Bennu
+Mandatory-Servers:
+    ziltoid
+    talos
+    metapod
+    mirror
+    felix
+    bennu
+    print
+    odin
+    docs
+    fsuvious
+    dubsdot
+    talks
