@@ -15,7 +15,8 @@ import java.util.Scanner;
  */
 public class ManagementServer {
 
-    private static String html, server;
+    private static String html = "";
+    private static String server = "";
     private static final ArrayList<ServerItem> hosts = new ArrayList<>();
 
     /**
