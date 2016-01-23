@@ -54,6 +54,9 @@ public class ManagementServer {
                     }
                     readHTML();
                     readServerHTML();
+                    for(ServerItem i: hosts) {
+                        i.up(Math.abs(i.lastComm() - System.currentTimeMillis()) < 120000);
+                    }
                 }
             }
         });
@@ -170,6 +173,18 @@ public class ManagementServer {
                 if (!path.equalsIgnoreCase("favicon.ico") && !path.isEmpty()) {
                     System.out.println(mode + " " + path);
                 }
+                
+                if(accept.getInetAddress().getAddress()[2] == -111) {
+                    for(ServerItem i: hosts) {
+                        if(i.getAddress().equals(accept.getInetAddress().getHostAddress())) {
+                            String[] parts = path.split("/");
+                            i.setKey(parts[0], parts[1]);
+                            i.lastComm(System.currentTimeMillis());
+                            i.up(true);
+                        }
+                    }
+                }
+                
                 boolean isServer = false;
                 ServerItem ser = null;
                 for (ServerItem i : hosts) {
@@ -200,6 +215,9 @@ public class ManagementServer {
                         output += k.getKeyName();
                         output += "</td><td>";
                         output += k.getKeyValue();
+                        if(k.getKeyName().equalsIgnoreCase("cpu")) {
+                            output += "%";
+                        }
                         output += "</td></tr>";
                     }
                 } else {
@@ -215,6 +233,14 @@ public class ManagementServer {
                             output += host.getName();
                             output += "</a></td><td>";
                             output += host.getAddress();
+                            output += "</td><td";
+                            if(!host.up()) {
+                                output += " style=\"background:#ff6600\" ";
+                            }else{
+                                output += " style=\"background:#589318\" ";
+                            }
+                            output += ">";
+                            output += host.up();
                             output += "</td></tr>";
                         }
                     }

@@ -18,8 +18,12 @@ public class ServerItem {
     private long lastComm;
 
     private ArrayList<Key> keys;
+    
+    private boolean up;
 
     public ServerItem(String host, String addr) {
+        up = false;
+        lastComm = 0;
         this.hostname = host;
         this.addr = addr;
         keys = new ArrayList<>();
@@ -95,5 +99,21 @@ public class ServerItem {
     }
     public ArrayList<Key> getKeys() {
         return keys;
+    }
+    
+    public void lastComm(long now) {
+        this.lastComm = now;
+    }
+    
+    public long lastComm() {
+        return this.lastComm;
+    }
+    
+    public boolean up() {
+        return this.up;
+    }
+    
+    public void up(boolean now) {
+        this.up = now;
     }
 }
