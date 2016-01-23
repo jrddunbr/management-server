@@ -93,4 +93,7 @@ public class ServerItem {
         }
         return "";
     }
+    public ArrayList<Key> getKeys() {
+        return keys;
+    }
 }

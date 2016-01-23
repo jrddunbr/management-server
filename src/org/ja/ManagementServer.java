@@ -46,18 +46,21 @@ public class ManagementServer {
 
             @Override
             public void run() {
-                try {
-                    Thread.sleep(60000);
-                } catch (InterruptedException ex) {
+                while (true) {
+                    try {
+                        Thread.sleep(20000);
+                    } catch (InterruptedException ex) {
+                    }
+                    System.out.println("Refreshing HTML documents");
+                    readHTML();
+                    readServerHTML();
                 }
-                readHTML();
-                readServerHTML();
             }
         });
         updateHTMLThread.start();
         Scanner reader = new Scanner(System.in);
-        while(true) {
-            if(reader.hasNext()) {
+        while (true) {
+            if (reader.hasNext()) {
                 System.exit(0);
             }
         }
@@ -158,7 +161,7 @@ public class ManagementServer {
                 String mode = command.substring(0, command.indexOf(" "));
                 String path = command.substring(command.indexOf(" ") + 1, command.indexOf(" ", command.indexOf(" ") + 1));
                 path = path.substring(1).trim();
-                //print out anything that is a command.
+                //print out anything that is a command or path.
                 if (!path.equalsIgnoreCase("favicon.ico") && !path.isEmpty()) {
                     System.out.println(mode + " " + path);
                 }
@@ -187,19 +190,28 @@ public class ManagementServer {
                     output += "</td><td>";
                     output += addr;
                     output += "</td></tr>";
+                    for (Key k : ser.getKeys()) {
+                        output += "<tr><td>";
+                        output += k.getKeyName();
+                        output += "</td><td>";
+                        output += k.getKeyValue();
+                        output += "</td></tr>";
+                    }
                 } else {
                     output = "";
                     int table = html.indexOf("<table>") + 7;
                     output = html.substring(0, table);
                     output += "<tr><td>Server Name</td><td>IP</td><td>Up?</td><td>Uptime</td></tr>";
-                    for(int i = 0; i < hosts.size(); i++) {
-                        output += "<tr><td><a href=\"";
-                        output += hosts.get(i).getName();
-                        output += "\">";
-                        output += hosts.get(i).getName();
-                        output += "</a></td><td>";
-                        output += hosts.get(i).getAddress();
-                        output += "</td></tr>";
+                    for (ServerItem host : hosts) {
+                        if (!host.getKey("disable").equalsIgnoreCase("disable")) {
+                            output += "<tr><td><a href=\"";
+                            output += host.getName();
+                            output += "\">";
+                            output += host.getName();
+                            output += "</a></td><td>";
+                            output += host.getAddress();
+                            output += "</td></tr>";
+                        }
                     }
                 }
 
