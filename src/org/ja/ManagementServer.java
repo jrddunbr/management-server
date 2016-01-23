@@ -51,7 +51,6 @@ public class ManagementServer {
                         Thread.sleep(20000);
                     } catch (InterruptedException ex) {
                     }
-                    System.out.println("Refreshing HTML documents");
                     readHTML();
                     readServerHTML();
                 }
@@ -74,7 +73,9 @@ public class ManagementServer {
             while (reader.hasNextLine()) {
                 read += reader.nextLine();
             }
-            html = read;
+            if(!html.equals(read)) {
+                html = read;
+            }
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
         }
@@ -88,7 +89,10 @@ public class ManagementServer {
             while (reader.hasNextLine()) {
                 read += reader.nextLine();
             }
-            server = read;
+            if(!server.equals(read)) {
+                server = read;
+                System.out.println("Updated Server HTML Template");
+            }
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
         }
