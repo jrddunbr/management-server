@@ -66,7 +66,7 @@ public class ServerItem {
         }
         keys = YamlOperator.readKeys(yaml);
         for (Key k : keys) {
-            System.out.println("Key: " + k.getKeyName() + " Value: " + k.getKeyValue());
+            System.out.println("Server: " + host + "Key: " + k.getKeyName() + " Value: " + k.getKeyValue());
         }
     }
 
@@ -110,6 +110,12 @@ public class ServerItem {
     }
     
     public boolean up() {
+        long diff = Math.abs(lastComm - System.currentTimeMillis());
+        if(diff < 60000) {
+            this.up = true;
+        }else{
+            this.up = false;
+        }
         return this.up;
     }
     

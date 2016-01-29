@@ -17,18 +17,31 @@ public class ManagementServer {
 
     private static String html = "";
     private static String server = "";
+    private static final ArrayList<String> servers = new ArrayList<>();
     private static final ArrayList<ServerItem> hosts = new ArrayList<>();
-
+    private static ArrayList<Key> masterKey = new ArrayList<>();
+    private static final int port = 8080;
+    private static final String GoodColor = "#589318";
+    private static final String QuestionableColor = "#cc9900";
+    private static final String BadColor = "#ff6600";
+    private static final String CriticalColor = "#cc0000";
+    
     /**
      *
      * @param args
      */
     public static void main(String[] args) {
-        //we can expect HTML after these two lines
-        readHTML();
+        readBaseHTML();
         readServerHTML();
-        //we can expect hosts to work after these two lines
-        importZones();//after this we can expect there to be hosts in the array list
+        getServers();
+        printServers();
+        try {
+            readMasterKeys();
+        }catch (Exception e) {
+            System.err.println("Error getting keys from key file.");
+        }
+        printMasterKeys();
+        importZones();
         Thread serverthread = new Thread(new Runnable() {
 
             @Override
@@ -52,7 +65,7 @@ public class ManagementServer {
                         Thread.sleep(20000);
                     } catch (InterruptedException ex) {
                     }
-                    readHTML();
+                    readBaseHTML();
                     readServerHTML();
                     for(ServerItem i: hosts) {
                         i.up(Math.abs(i.lastComm() - System.currentTimeMillis()) < 120000);
@@ -63,13 +76,16 @@ public class ManagementServer {
         updateHTMLThread.start();
         Scanner reader = new Scanner(System.in);
         while (true) {
+            try {
+                Thread.sleep(100);
+            }catch(Exception e) {}
             if (reader.hasNext()) {
                 System.exit(0);
             }
         }
     }
 
-    private static void readHTML() {
+    private static void readBaseHTML() {
         try {
             File file = new File("index.html");
             Scanner reader = new Scanner(file);
@@ -102,12 +118,95 @@ public class ManagementServer {
         }
     }
 
+    private static void getServers() {
+        try {
+            File file = new File("db.cslabs");
+            file.delete();
+            try {
+                Runtime.getRuntime().exec("wget --no-check-certificate https://talos.cslabs.clarkson.edu/db.cslabs").waitFor();
+            } catch (IOException | InterruptedException ex) {
+            }
+            while (!file.canRead()) {
+            }
+            {
+
+            }
+            String read = "";
+            Scanner reader = new Scanner(file);
+            while (reader.hasNextLine()) {
+                read = reader.nextLine();
+                read = read.trim();
+                if (read.length() > 1) {
+                    char first = read.charAt(0);
+
+                    if (Character.isAlphabetic(first) && read.contains("IN A")) {
+                        int end = read.indexOf('\t');
+                        int begin = read.indexOf("IN A") + 4;
+                        String host = read.substring(0, end);
+                        servers.add(host);
+                    }
+                }
+            }
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    private static void printServers() {
+        for (String host: servers) {
+            System.out.println("Server: " + host);
+        }
+    }
+    
+    private static void readMasterKeys() throws FileNotFoundException {
+        Scanner reader = new Scanner(new File("master.yml"));
+        String masterYml = "";
+        while(reader.hasNextLine()) {
+            masterYml += reader.nextLine() + "\n";
+        }
+        masterKey = YamlOperator.readKeys(masterYml);
+    }
+    
+    private static void printMasterKeys() {
+        for(Key k : masterKey) {
+            System.out.println("Key: " + k.getKeyName() + " Value: " + k.getKeyValue());
+        }
+    }
+    
+    private static String determineColorSeverity() {
+        int down = 0;
+        ArrayList<String> critical = new ArrayList<>();
+        for(Key k: masterKey) {
+            if(k.getKeyName().equalsIgnoreCase("mandatory")) {
+                critical.add(k.getKeyValue());
+            }
+        }
+        for(ServerItem i: hosts) {
+            for(String s: critical) {
+                if(i.getName().equalsIgnoreCase(s)) {
+                    if(!i.up()) {
+                        down++;
+                    }
+                }
+            }
+        }
+        if(down == 0) {
+            return GoodColor;
+        }else if(down < 2) {
+            return QuestionableColor;
+        }else if(down < 3) {
+            return BadColor;
+        }else{
+            return CriticalColor;
+        }
+    }
+    
     private static void importZones() {
         try {
             File file = new File("db.cslabs");
             file.delete();
             try {
-                Runtime.getRuntime().exec("wget https://talos.cslabs.clarkson.edu/db.cslabs").waitFor();
+                Runtime.getRuntime().exec("wget --no-check-certificate https://talos.cslabs.clarkson.edu/db.cslabs").waitFor();
             } catch (IOException | InterruptedException ex) {
             }
             while (!file.canRead()) {
@@ -128,8 +227,8 @@ public class ManagementServer {
                         int begin = read.indexOf("IN A") + 4;
                         String host = read.substring(0, end);
                         String addr = read.substring(begin, read.length()).trim();
-                        ServerItem si = new ServerItem(host, addr);
-                        hosts.add(si);
+                        ServerItem item = new ServerItem(host, addr);
+                        hosts.add(item);
                     }
                 }
             }
@@ -137,15 +236,21 @@ public class ManagementServer {
             ex.printStackTrace();
         }
     }
-
-    private static void printHosts() {
-        for (ServerItem host : hosts) {
-            System.out.println("Address: " + host.getAddress() + "\tHost: " + host.getName());
+    
+    private static ArrayList<String> determineServerList() {
+        ArrayList<String> showList = new ArrayList<>();
+        for(Key k: masterKey) {
+            if(k.getKeyName().equalsIgnoreCase("mandatory")) {
+                showList.add(k.getKeyValue());
+            }else if(k.getKeyName().equalsIgnoreCase("optional")) {
+                showList.add(k.getKeyValue());
+            }
         }
+        return showList;
     }
 
     private static void server() throws IOException {
-        ServerSocket socket = new ServerSocket(8080);
+        ServerSocket socket = new ServerSocket(port);
         System.out.println("Starting Web Server");
         //made a server, let's get the clients.
         while (true) {
@@ -174,6 +279,7 @@ public class ManagementServer {
                     System.out.println(mode + " " + path);
                 }
                 
+                //checks the origin location to see if it's on the *.145.*
                 if(accept.getInetAddress().getAddress()[2] == -111) {
                     for(ServerItem i: hosts) {
                         if(i.getAddress().equals(accept.getInetAddress().getHostAddress())) {
@@ -199,9 +305,13 @@ public class ManagementServer {
                     output = "";
                     String name = ser.getName();
                     String addr = ser.getAddress();
-
+                    String color = BadColor;
+                    if(ser.up()) {
+                        color = GoodColor;
+                    }
                     int header = server.indexOf("<h1>") + 4;
                     output = server.substring(0, header);
+                    output = output.replaceFirst("BGCOLOR", color);
                     output += name;
                     int table = server.indexOf("<table>") + 7;
                     output += server.substring(header, table);
@@ -224,9 +334,17 @@ public class ManagementServer {
                     output = "";
                     int table = html.indexOf("<table>") + 7;
                     output = html.substring(0, table);
+                    output = output.replaceFirst("BGCOLOR", determineColorSeverity());
                     output += "<tr><td>Server Name</td><td>IP</td><td>Up?</td><td>Uptime</td></tr>";
                     for (ServerItem host : hosts) {
-                        if (!host.getKey("disable").equalsIgnoreCase("disable")) {
+                        boolean show = false;
+                        ArrayList<String> showServers = determineServerList();
+                        for(String s: showServers) {
+                            if(s.equalsIgnoreCase(host.getName())) {
+                                show = true;
+                            }
+                        }
+                        if (show) {
                             output += "<tr><td><a href=\"";
                             output += host.getName();
                             output += "\">";
