@@ -131,7 +131,7 @@ public class ManagementServer {
             {
 
             }
-            String read = "";
+            String read;
             Scanner reader = new Scanner(file);
             while (reader.hasNextLine()) {
                 read = reader.nextLine();
@@ -214,7 +214,7 @@ public class ManagementServer {
             {
 
             }
-            String read = "";
+            String read;
             Scanner reader = new Scanner(file);
             while (reader.hasNextLine()) {
                 read = reader.nextLine();
@@ -302,7 +302,6 @@ public class ManagementServer {
 
                 String output;
                 if (isServer) {
-                    output = "";
                     String name = ser.getName();
                     String addr = ser.getAddress();
                     String color = BadColor;
@@ -331,7 +330,6 @@ public class ManagementServer {
                         output += "</td></tr>";
                     }
                 } else {
-                    output = "";
                     int table = html.indexOf("<table>") + 7;
                     output = html.substring(0, table);
                     output = output.replaceFirst("BGCOLOR", determineColorSeverity());
