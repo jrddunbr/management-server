@@ -427,7 +427,7 @@ public class ManagementServer {
                     //redirect to the favicon to make the browser happy.
                     //the user doesn't see anything.
                     out.println("HTTP/1.1 302 Found");
-                    out.println("Location: http://clarkson.edu/favicon.ico");
+                    out.println("Location: http://docs/w/images/4/4e/Manage.ico");
                     //well, browsers like to get favicons so let's just not.
                     //out.println("HTTP/1.1 400 NOT FOUND");
 
