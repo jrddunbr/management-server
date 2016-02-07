@@ -20,7 +20,7 @@ public class ManagementServer {
     private static final ArrayList<String> servers = new ArrayList<>();
     private static final ArrayList<ServerItem> hosts = new ArrayList<>();
     private static ArrayList<Key> masterKey = new ArrayList<>();
-    private static final int port = 8080;
+    private static final int port = 80;
     private static final String GoodColor = "#589318";
     private static final String QuestionableColor = "#cc9900";
     private static final String BadColor = "#ff6600";
@@ -38,8 +38,9 @@ public class ManagementServer {
         try {
             readMasterKeys();
         }catch (Exception e) {
-            System.err.println("Error getting keys from key file.");
+            System.out.println("Error getting keys from key file.");
         }
+        System.out.println("Printing Master Keys:");
         printMasterKeys();
         importZones();
         Thread serverthread = new Thread(new Runnable() {
@@ -56,7 +57,7 @@ public class ManagementServer {
             }
         });
         serverthread.start();
-        Thread updateHTMLThread = new Thread(new Runnable() {
+        Thread updateThread = new Thread(new Runnable() {
 
             @Override
             public void run() {
@@ -73,15 +74,44 @@ public class ManagementServer {
                 }
             }
         });
-        updateHTMLThread.start();
+        updateThread.start();
         Scanner reader = new Scanner(System.in);
         while (true) {
             try {
                 Thread.sleep(100);
             }catch(Exception e) {}
-            if (reader.hasNext()) {
-                System.exit(0);
+            if (reader.hasNextLine()) {
+                String line = reader.nextLine();
+                if(line.equalsIgnoreCase("stop") || line.equals("q")) {
+                    System.exit(0);
+                }
+                if(line.equalsIgnoreCase("emulate")) {
+                    emulatePacket();
+                }
             }
+        }
+    }
+    
+    private static void emulatePacket() {
+        Scanner reader = new Scanner(System.in);
+        System.out.println("Select a server to send from: ");
+        int i = 0;
+        for(ServerItem s: hosts) {
+            System.out.println(i + ": " + s.getName());
+            i++;
+        }
+        int selection = -1;
+        while(!reader.hasNextLine()){}
+        try{
+            selection = Integer.parseInt(reader.nextLine());
+        }catch (Exception e) {
+            
+        }
+        if(selection != -1) {
+            ServerItem ser = hosts.get(selection);
+            ser.setKey("test", "live");
+            ser.lastComm(System.currentTimeMillis());
+            ser.up(true);
         }
     }
 
@@ -240,13 +270,21 @@ public class ManagementServer {
     private static ArrayList<String> determineServerList() {
         ArrayList<String> showList = new ArrayList<>();
         for(Key k: masterKey) {
-            if(k.getKeyName().equalsIgnoreCase("mandatory")) {
-                showList.add(k.getKeyValue());
-            }else if(k.getKeyName().equalsIgnoreCase("optional")) {
-                showList.add(k.getKeyValue());
+            if(k.getKeyValue().equalsIgnoreCase("mandatory")) {
+                showList.add(k.getKeyName());
+            }else if(k.getKeyValue().equalsIgnoreCase("optional")) {
+                showList.add(k.getKeyName());
             }
         }
         return showList;
+    }
+    
+    private static void printShowServerList() {
+        System.out.println("Printing Show Server List:");
+        ArrayList<String> showList = determineServerList();
+        for(String s: showList) {
+            System.out.println("ShowList: " + s);
+        }
     }
 
     private static void server() throws IOException {
@@ -276,7 +314,7 @@ public class ManagementServer {
                 path = path.substring(1).trim();
                 //print out anything that is a command or path.
                 if (!path.equalsIgnoreCase("favicon.ico") && !path.isEmpty()) {
-                    System.out.println(mode + " " + path);
+                    //System.out.println(mode + " " + path);
                 }
                 
                 //checks the origin location to see if it's on the *.145.*
@@ -284,7 +322,7 @@ public class ManagementServer {
                     for(ServerItem i: hosts) {
                         if(i.getAddress().equals(accept.getInetAddress().getHostAddress())) {
                             String[] parts = path.split("/");
-                            i.setKey(parts[0], parts[1]);
+                            i.setKey(parts[0], parts[1].replaceAll("_", " "));
                             i.lastComm(System.currentTimeMillis());
                             i.up(true);
                         }
@@ -357,6 +395,13 @@ public class ManagementServer {
                             }
                             output += ">";
                             output += host.up();
+                            output += "</td><td>";
+                            String uptime = host.getKey("uptime");
+                            if(uptime.isEmpty()) {
+                                output += "erg!";
+                            }else{
+                                output += host.getKey("uptime");
+                            }
                             output += "</td></tr>";
                         }
                     }
