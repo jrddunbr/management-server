@@ -461,28 +461,3 @@ public class ManagementServer {
         }
     }
 }
-
-/*
-
-HTML for bar
-
-<div id="progressbar">
-  <div></div>
-</div>
-
-CSS for bar
-
-#progressbar {
-  background-color: black;
-  border-radius: 4px;
-  padding: 2px;
-}
-
-#progressbar > div {
-   background-color: #69c;
-   width: 40%; //adjust this!
-   height: 20px;
-   border-radius: 2px;
-}
-
-*/
