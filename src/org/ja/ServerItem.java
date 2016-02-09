@@ -97,6 +97,16 @@ public class ServerItem {
         }
         return "";
     }
+    
+    public boolean hasKey(String key) {
+        for(Key k : keys) {
+            if(k.getKeyName().equalsIgnoreCase(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public ArrayList<Key> getKeys() {
         return keys;
     }

@@ -340,6 +340,7 @@ public class ManagementServer {
 
                 String output;
                 if (isServer) {
+                    String css = "";
                     String name = ser.getName();
                     String addr = ser.getAddress();
                     String color = BadColor;
@@ -357,17 +358,36 @@ public class ManagementServer {
                     output += "</td><td>";
                     output += addr;
                     output += "</td></tr>";
-                    for (Key k : ser.getKeys()) {
-                        output += "<tr><td>";
-                        output += k.getKeyName();
-                        output += "</td><td>";
-                        output += k.getKeyValue();
-                        if(k.getKeyName().equalsIgnoreCase("cpu")) {
-                            output += "%";
-                        }
-                        output += "</td></tr>";
+                    if(ser.hasKey("cpu")) {
+                        double cpuPercent = 0.0;
+                        try {
+                            cpuPercent = Double.parseDouble(ser.getKey("cpu"));
+                        }catch (Exception e) {}
+                        css += "#cpubar {\n" +
+                            "  background-color: black;\n" +
+                            "  border-radius: 4px;\n" +
+                            "  padding: 2px;\n" +
+                            "}\n" +
+                            "#cpubar > div {\n" +
+                            "   background-color: #69c;\n" +
+                            "   width: " + cpuPercent + "%;" +
+                            "   height: 20px;\n" +
+                            "   border-radius: 2px;\n" +
+                            "}";
+                        output += "<tr><td>cpu</td><td><div id=\"cpubar\"><div>" + cpuPercent + "%</div></div></td></tr>";
                     }
+                    for (Key k : ser.getKeys()) {
+                        if(!k.getKeyName().equalsIgnoreCase("cpu")) {
+                            output += "<tr><td>";
+                            output += k.getKeyName();
+                            output += "</td><td>";
+                            output += k.getKeyValue();
+                            output += "</td></tr>";
+                        }
+                    }
+                    output = output.replaceAll("OCS", css);
                 } else {
+                    String css = "";
                     int table = html.indexOf("<table>") + 7;
                     output = html.substring(0, table);
                     output = output.replaceFirst("BGCOLOR", determineColorSeverity());
@@ -404,8 +424,11 @@ public class ManagementServer {
                             }
                             output += "</td></tr>";
                         }
+                        output = output.replaceAll("OCS", css);
                     }
                 }
+                
+                
 
                 /* 
                  If we are in the root action directory (or approved directory),
@@ -442,3 +465,28 @@ public class ManagementServer {
         }
     }
 }
+
+/*
+
+HTML for bar
+
+<div id="progressbar">
+  <div></div>
+</div>
+
+CSS for bar
+
+#progressbar {
+  background-color: black;
+  border-radius: 4px;
+  padding: 2px;
+}
+
+#progressbar > div {
+   background-color: #69c;
+   width: 40%; //adjust this!
+   height: 20px;
+   border-radius: 2px;
+}
+
+*/
