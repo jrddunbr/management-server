@@ -207,8 +207,8 @@ public class ManagementServer {
         int down = 0;
         ArrayList<String> critical = new ArrayList<>();
         for(Key k: masterKey) {
-            if(k.getKeyName().equalsIgnoreCase("mandatory")) {
-                critical.add(k.getKeyValue());
+            if(k.getKeyValue().equalsIgnoreCase("mandatory")) {
+                critical.add(k.getKeyName());
             }
         }
         for(ServerItem i: hosts) {
@@ -364,17 +364,13 @@ public class ManagementServer {
                             cpuPercent = Double.parseDouble(ser.getKey("cpu"));
                         }catch (Exception e) {}
                         css += "#cpubar {\n" +
-                            "  background-color: black;\n" +
-                            "  border-radius: 4px;\n" +
-                            "  padding: 2px;\n" +
-                            "}\n" +
-                            "#cpubar > div {\n" +
-                            "   background-color: #69c;\n" +
-                            "   width: " + cpuPercent + "%;" +
-                            "   height: 20px;\n" +
-                            "   border-radius: 2px;\n" +
+                            "background-color: #69c;\n" +
+                            "width: " + cpuPercent + "%;" +
+                            "height: 60%;" +
+                            "border-radius: 4px;\n" +
+                            "margin-left:5px;margin-right:5px;" +
                             "}";
-                        output += "<tr><td>cpu</td><td><div id=\"cpubar\"><div>" + cpuPercent + "%</div></div></td></tr>";
+                        output += "<tr><td>cpu</td><td><div id=\"cpubar\">" + cpuPercent + "%</div></td></tr>";
                     }
                     for (Key k : ser.getKeys()) {
                         if(!k.getKeyName().equalsIgnoreCase("cpu")) {
