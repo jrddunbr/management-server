@@ -372,8 +372,29 @@ public class ManagementServer {
                                         + "}";
                                 output += "<tr><td>cpu</td><td><div id=\"cpubar\">" + cpuPercent + "%</div></td></tr>";
                             }
+                            boolean doRam = true;
+                            if(ser.hasKey("total-ram") && ser.hasKey("used-ram")) {
+                                double ramPercent = 0.0;
+                                double ramTotal = 0.0;
+                                double ramUsed = 0.0;
+                                try {
+                                    ramTotal = Double.parseDouble(ser.getKey("total-ram").replaceAll("MB", ""));
+                                    ramUsed = Double.parseDouble(ser.getKey("used-ram").replaceAll("MB", ""));
+                                    ramPercent = (ramTotal - ramUsed) / ramTotal;
+                                } catch (Exception e) {
+                                }
+                                css += "#rambar {\n"
+                                        + "background-color: #69c;\n"
+                                        + "width: " + ramPercent + "%;"
+                                        + "height: 60%;"
+                                        + "border-radius: 4px;\n"
+                                        + "margin-left:5px;margin-right:5px;"
+                                        + "}";
+                                output += "<tr><td>ram</td><td><div id=\"rambar\">" + ramUsed + "MB</div></td></tr>";
+                                doRam = false;
+                            }
                             for (Key k : ser.getKeys()) {
-                                if (!k.getKeyName().equalsIgnoreCase("cpu")) {
+                                if (!k.getKeyName().equalsIgnoreCase("cpu") || !(k.getKeyName().equalsIgnoreCase("used-ram") && !doRam) || !(k.getKeyName().equalsIgnoreCase("total-ram") && !doRam)) {
                                     output += "<tr><td>";
                                     output += k.getKeyName();
                                     output += "</td><td>";
