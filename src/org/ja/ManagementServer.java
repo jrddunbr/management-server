@@ -380,7 +380,7 @@ public class ManagementServer {
                                 try {
                                     ramTotal = Double.parseDouble(ser.getKey("total-ram").replaceAll("MB", ""));
                                     ramUsed = Double.parseDouble(ser.getKey("used-ram").replaceAll("MB", ""));
-                                    ramPercent = (ramTotal - ramUsed) / ramTotal;
+                                    ramPercent = ((1.0 - (ramTotal - ramUsed) / ramTotal)) * 100;
                                 } catch (Exception e) {
                                 }
                                 css += "#rambar {\n"
@@ -394,7 +394,7 @@ public class ManagementServer {
                                 doRam = false;
                             }
                             for (Key k : ser.getKeys()) {
-                                if (!k.getKeyName().equalsIgnoreCase("cpu") && !(k.getKeyName().equalsIgnoreCase("used-ram") && !doRam) || !(k.getKeyName().equalsIgnoreCase("total-ram") && !doRam)) {
+                                if (!(k.getKeyName().equalsIgnoreCase("cpu") || (k.getKeyName().equalsIgnoreCase("used-ram") && !doRam) || (k.getKeyName().equalsIgnoreCase("total-ram") && !doRam))) {
                                     output += "<tr><td>";
                                     output += k.getKeyName();
                                     output += "</td><td>";
