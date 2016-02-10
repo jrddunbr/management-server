@@ -14,14 +14,14 @@ import java.util.Scanner;
  * @author jared
  */
 public class ManagementServer {
-
+    
     private static String html = "";
     private static String server = "";
     private static final ArrayList<String> servers = new ArrayList<>();
     private static final ArrayList<String> serverIps = new ArrayList<>();
     private static final ArrayList<ServerItem> hosts = new ArrayList<>();
     private static ArrayList<Key> masterKey = new ArrayList<>();
-    private static final int port = 80;
+    private static final int port = 8080;
     private static final String GoodColor = "#589318";
     private static final String QuestionableColor = "#cc9900";
     private static final String BadColor = "#ff6600";
@@ -44,7 +44,7 @@ public class ManagementServer {
         getServerIPs();
         printServers();
         Thread serverthread = new Thread(new Runnable() {
-
+            
             @Override
             public void run() {
                 server();
@@ -52,7 +52,7 @@ public class ManagementServer {
         });
         serverthread.start();
         Thread updateThread = new Thread(new Runnable() {
-
+            
             @Override
             public void run() {
                 while (true) {
@@ -86,7 +86,7 @@ public class ManagementServer {
             }
         }
     }
-
+    
     private static void emulatePacket() {
         Scanner reader = new Scanner(System.in);
         System.out.println("Select a server to send from: ");
@@ -101,7 +101,7 @@ public class ManagementServer {
         try {
             selection = Integer.parseInt(reader.nextLine());
         } catch (Exception e) {
-
+            
         }
         if (selection != -1) {
             ServerItem ser = hosts.get(selection);
@@ -110,7 +110,7 @@ public class ManagementServer {
             ser.up(true);
         }
     }
-
+    
     private static void readBaseHTML() {
         try {
             File file = new File("index.html");
@@ -126,7 +126,7 @@ public class ManagementServer {
             ex.printStackTrace();
         }
     }
-
+    
     private static void readServerHTML() {
         try {
             File file = new File("server.html");
@@ -145,21 +145,20 @@ public class ManagementServer {
     }
     
     private static void getServerIPs() {
-        for(Key k : masterKey) {
-            if(k.getKeyName().startsWith("ip")) {
+        for (Key k : masterKey) {
+            if (k.getKeyName().startsWith("ip")) {
                 serverIps.add(k.getKeyValue());
-                if(getServerNameFromIP(k.getKeyValue()).trim().isEmpty()) {
+                if (!getServerNameFromIP(k.getKeyValue()).isEmpty()) {
                     servers.add(getServerNameFromIP(k.getKeyValue()));
                     ServerItem item = new ServerItem(getServerNameFromIP(k.getKeyValue()), k.getKeyValue());
                     hosts.add(item);
                 }
             }
-            if(k.getKeyName().startsWith("sub")) {
-                for(int i = 1; i < 254; i++) {
+            if (k.getKeyName().startsWith("sub")) {
+                for (int i = 1; i < 254; i++) {
                     String ip = k.getKeyValue() + "." + i;
                     serverIps.add(ip);
-                    System.out.println(getServerNameFromIP(ip));
-                    if(getServerNameFromIP(ip).trim().isEmpty()) {
+                    if (!getServerNameFromIP(ip).isEmpty()) {
                         servers.add(getServerNameFromIP(k.getKeyValue()));
                         ServerItem item = new ServerItem(getServerNameFromIP(ip), ip);
                     }
@@ -167,7 +166,7 @@ public class ManagementServer {
             }
         }
     }
-
+    
     public static String getServerNameFromIP(String ip) {
         try {
             File file = new File("host.txt");
@@ -180,19 +179,19 @@ public class ManagementServer {
             Scanner reader = new Scanner(file);
             if (reader.hasNextLine()) {
                 read = reader.nextLine();
-                return read;
+                return read.trim();
             }
         } catch (FileNotFoundException ex) {
         }
         return "";
     }
-
+    
     private static void printServers() {
         for (String host : servers) {
             System.out.println("Server: " + host);
         }
     }
-
+    
     private static void readMasterKeys() throws FileNotFoundException {
         Scanner reader = new Scanner(new File("master.yml"));
         String masterYml = "";
@@ -201,13 +200,13 @@ public class ManagementServer {
         }
         masterKey = YamlOperator.readKeys(masterYml);
     }
-
+    
     private static void printMasterKeys() {
         for (Key k : masterKey) {
             System.out.println("Key: " + k.getKeyName() + " Value: " + k.getKeyValue());
         }
     }
-
+    
     private static String determineColorSeverity() {
         int down = 0;
         ArrayList<String> critical = new ArrayList<>();
@@ -235,7 +234,7 @@ public class ManagementServer {
             return CriticalColor;
         }
     }
-
+    
     private static ArrayList<String> determineServerList() {
         ArrayList<String> showList = new ArrayList<>();
         for (Key k : masterKey) {
@@ -247,7 +246,7 @@ public class ManagementServer {
         }
         return showList;
     }
-
+    
     private static void printShowServerList() {
         System.out.println("Printing Show Server List:");
         ArrayList<String> showList = determineServerList();
@@ -255,7 +254,7 @@ public class ManagementServer {
             System.out.println("ShowList: " + s);
         }
     }
-
+    
     private static void server() {
         ServerSocket socket;
         try {
@@ -290,17 +289,19 @@ public class ManagementServer {
                         }
 
                         //checks the origin location to see if it's on the *.145.*
-                        if (accept.getInetAddress().getAddress()[2] == -111) {
-                            for (ServerItem i : hosts) {
-                                if (i.getAddress().equals(accept.getInetAddress().getHostAddress())) {
-                                    String[] parts = path.split("/");
-                                    i.setKey(parts[0], parts[1].replaceAll("_", " "));
-                                    i.lastComm(System.currentTimeMillis());
-                                    i.up(true);
+                        for (String ser : serverIps) {
+                            if (accept.getInetAddress().getHostAddress().equalsIgnoreCase(ser)) {
+                                for (ServerItem i : hosts) {
+                                    if (i.getAddress().equals(accept.getInetAddress().getHostAddress())) {
+                                        String[] parts = path.split("/");
+                                        i.setKey(parts[0], parts[1].replaceAll("_", " "));
+                                        i.lastComm(System.currentTimeMillis());
+                                        i.up(true);
+                                    }
                                 }
                             }
                         }
-
+                        
                         boolean isServer = false;
                         ServerItem ser = null;
                         for (ServerItem i : hosts) {
@@ -309,7 +310,7 @@ public class ManagementServer {
                                 ser = i;
                             }
                         }
-
+                        
                         String output;
                         if (isServer) {
                             String css = "";
