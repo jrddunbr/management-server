@@ -394,7 +394,7 @@ public class ManagementServer {
                                 doRam = false;
                             }
                             for (Key k : ser.getKeys()) {
-                                if (!k.getKeyName().equalsIgnoreCase("cpu") || !(k.getKeyName().equalsIgnoreCase("used-ram") && !doRam) || !(k.getKeyName().equalsIgnoreCase("total-ram") && !doRam)) {
+                                if (!k.getKeyName().equalsIgnoreCase("cpu") && !(k.getKeyName().equalsIgnoreCase("used-ram") && !doRam) || !(k.getKeyName().equalsIgnoreCase("total-ram") && !doRam)) {
                                     output += "<tr><td>";
                                     output += k.getKeyName();
                                     output += "</td><td>";
