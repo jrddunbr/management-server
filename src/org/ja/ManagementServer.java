@@ -390,7 +390,7 @@ public class ManagementServer {
                                         + "border-radius: 4px;\n"
                                         + "margin-left:5px;margin-right:5px;"
                                         + "}";
-                                output += "<tr><td>ram</td><td><div id=\"rambar\">" + ramUsed + "MB</div></td></tr>";
+                                output += "<tr><td>ram (total: " + ramTotal + "MB)</td><td><div id=\"rambar\">" + ramUsed + "MB</div></td></tr>";
                                 doRam = false;
                             }
                             for (Key k : ser.getKeys()) {
