@@ -18,7 +18,6 @@ public class ManagementServer {
     private static String html = "";
     private static String server = "";
     private static final ArrayList<String> servers = new ArrayList<>();
-    private static final ArrayList<String> serverIps = new ArrayList<>();
     private static final ArrayList<ServerItem> hosts = new ArrayList<>();
     private static ArrayList<Key> masterKey = new ArrayList<>();
     private static final int port = 80;
@@ -34,6 +33,8 @@ public class ManagementServer {
     public static void main(String[] args) {
         readBaseHTML();
         readServerHTML();
+        getServers();
+        printServers();
         try {
             readMasterKeys();
         } catch (Exception e) {
@@ -41,8 +42,7 @@ public class ManagementServer {
         }
         System.out.println("Printing Master Keys:");
         printMasterKeys();
-        getServerIPs();
-        printServers();
+        importZones();
         Thread serverthread = new Thread(new Runnable() {
 
             @Override
@@ -143,48 +143,39 @@ public class ManagementServer {
             ex.printStackTrace();
         }
     }
-    
-    private static void getServerIPs() {
-        for(Key k : masterKey) {
-            if(k.getKeyName().startsWith("ip")) {
-                serverIps.add(k.getKeyValue());
-                if(getServerNameFromIP(k.getKeyValue()).trim().isEmpty()) {
-                    servers.add(getServerNameFromIP(k.getKeyValue()));
-                    ServerItem item = new ServerItem(getServerNameFromIP(k.getKeyValue()), k.getKeyValue());
-                    hosts.add(item);
-                }
-            }
-            if(k.getKeyName().startsWith("sub")) {
-                for(int i = 1; i < 254; i++) {
-                    String ip = k.getKeyValue() + "." + i;
-                    serverIps.add(ip);
-                    System.out.println(getServerNameFromIP(ip));
-                    if(getServerNameFromIP(ip).trim().isEmpty()) {
-                        servers.add(getServerNameFromIP(k.getKeyValue()));
-                        ServerItem item = new ServerItem(getServerNameFromIP(ip), ip);
-                    }
-                }
-            }
-        }
-    }
 
-    public static String getServerNameFromIP(String ip) {
+    private static void getServers() {
         try {
-            File file = new File("host.txt");
+            File file = new File("db.cslabs");
             file.delete();
             try {
-                Runtime.getRuntime().exec("bash getHost.sh " + ip).waitFor();
+                Runtime.getRuntime().exec("wget --no-check-certificate https://talos.cslabs.clarkson.edu/db.cslabs").waitFor();
             } catch (IOException | InterruptedException ex) {
+            }
+            while (!file.canRead()) {
+            }
+            {
+
             }
             String read;
             Scanner reader = new Scanner(file);
-            if (reader.hasNextLine()) {
+            while (reader.hasNextLine()) {
                 read = reader.nextLine();
-                return read;
+                read = read.trim();
+                if (read.length() > 1) {
+                    char first = read.charAt(0);
+
+                    if (Character.isAlphabetic(first) && read.contains("IN A")) {
+                        int end = read.indexOf('\t');
+                        int begin = read.indexOf("IN A") + 4;
+                        String host = read.substring(0, end);
+                        servers.add(host);
+                    }
+                }
             }
         } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
         }
-        return "";
     }
 
     private static void printServers() {
@@ -233,6 +224,42 @@ public class ManagementServer {
             return BadColor;
         } else {
             return CriticalColor;
+        }
+    }
+
+    private static void importZones() {
+        try {
+            File file = new File("db.cslabs");
+            file.delete();
+            try {
+                Runtime.getRuntime().exec("wget --no-check-certificate https://talos.cslabs.clarkson.edu/db.cslabs").waitFor();
+            } catch (IOException | InterruptedException ex) {
+            }
+            while (!file.canRead()) {
+            }
+            {
+
+            }
+            String read;
+            Scanner reader = new Scanner(file);
+            while (reader.hasNextLine()) {
+                read = reader.nextLine();
+                read = read.trim();
+                if (read.length() > 1) {
+                    char first = read.charAt(0);
+
+                    if (Character.isAlphabetic(first) && read.contains("IN A")) {
+                        int end = read.indexOf('\t');
+                        int begin = read.indexOf("IN A") + 4;
+                        String host = read.substring(0, end);
+                        String addr = read.substring(begin, read.length()).trim();
+                        ServerItem item = new ServerItem(host, addr);
+                        hosts.add(item);
+                    }
+                }
+            }
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -398,12 +425,12 @@ public class ManagementServer {
                         }
 
                         /* 
-                         If we are in the root action directory (or approved directory),
-                         then return some info, otherwise do a 302 redirect to known territory
-                         Typically we leave known territory when making requests, and they
-                         bump us right back to the root thanks to the 302. The browser gives us the
-                         ability to collect data thanks to the redirect since it calls a function
-                         from the path that we specified in the initial redirect link that we click.
+                 If we are in the root action directory (or approved directory),
+                 then return some info, otherwise do a 302 redirect to known territory
+                 Typically we leave known territory when making requests, and they
+                 bump us right back to the root thanks to the 302. The browser gives us the
+                 ability to collect data thanks to the redirect since it calls a function
+                 from the path that we specified in the initial redirect link that we click.
                          */
                         if (path.isEmpty() || isServer) {
                             //basic HTTP response with success. Makes the browser happy.
