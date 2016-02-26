@@ -41,6 +41,9 @@ public class ServerItem {
         }
         File file = new File("servers/" + host + ".yml");
         if (!file.exists()) {
+            if(!(new File("servers")).exists()) {
+                createServerDirectory();
+            }
             System.out.println("Generating YAML for " + host);
             try {
                 file.createNewFile();
@@ -131,5 +134,13 @@ public class ServerItem {
     
     public void up(boolean now) {
         this.up = now;
+    }
+    
+    private void createServerDirectory() {
+        try {
+            Runtime.getRuntime().exec("mkdir servers").waitFor();
+        } catch (Exception ex) {
+            System.out.println("Could not make servers directory");
+        }
     }
 }
