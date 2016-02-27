@@ -377,7 +377,7 @@ public class ManagementServer {
                                 try {
                                     ramTotal = Double.parseDouble(ser.getKey("total-ram").replaceAll("MB", ""));
                                     ramUsed = Double.parseDouble(ser.getKey("used-ram").replaceAll("MB", ""));
-                                    ramPercent = ((1.0 - (ramTotal - ramUsed) / ramTotal)) * 100;
+                                    ramPercent = (ramUsed / ramTotal) * 100;
                                 } catch (Exception e) {
                                 }
                                 css += "#rambar {\n"
