@@ -128,6 +128,7 @@ public class ServerItem {
             this.up = true;
         }else{
             this.up = false;
+            keys.clear();
         }
         return this.up;
     }
