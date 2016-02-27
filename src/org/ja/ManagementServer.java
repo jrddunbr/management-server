@@ -25,6 +25,8 @@ public class ManagementServer {
     private static final String QuestionableColor = "#cc9900";
     private static final String BadColor = "#ff6600";
     private static final String CriticalColor = "#cc0000";
+    private static final String LightGoodColor = "#CDF1A7";
+    private static final String LightBadColor = "#FFC299";
 
     /**
      *
@@ -377,7 +379,7 @@ public class ManagementServer {
                                 try {
                                     ramTotal = Double.parseDouble(ser.getKey("total-ram").replaceAll("MB", ""));
                                     ramUsed = Double.parseDouble(ser.getKey("used-ram").replaceAll("MB", ""));
-                                    ramPercent = (ramUsed / ramTotal) * 100;
+                                    ramPercent = ((double)ramUsed / (double)ramTotal) * 100.0;
                                 } catch (Exception e) {
                                 }
                                 css += "#rambar {\n"
@@ -394,7 +396,14 @@ public class ManagementServer {
                                 if (!(k.getKeyName().equalsIgnoreCase("cpu") || (k.getKeyName().equalsIgnoreCase("used-ram") && !doRam) || (k.getKeyName().equalsIgnoreCase("total-ram") && !doRam))) {
                                     output += "<tr><td>";
                                     output += k.getKeyName();
-                                    output += "</td><td>";
+                                    output += "</td><td";
+                                    if(k.getKeyValue().equals("running")) {
+                                        output += " class=\"running\" ";
+                                    }
+                                    if(k.getKeyValue().equals("shut off")) {
+                                        output += " class=\"shut_off\" ";
+                                    }
+                                    output += ">";
                                     output += k.getKeyValue();
                                     output += "</td></tr>";
                                 }
