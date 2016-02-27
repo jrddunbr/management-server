@@ -154,9 +154,6 @@ public class ManagementServer {
             }
             while (!file.canRead()) {
             }
-            {
-
-            }
             String read;
             Scanner reader = new Scanner(file);
             while (reader.hasNextLine()) {
