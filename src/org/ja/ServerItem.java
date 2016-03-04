@@ -1,9 +1,6 @@
 package org.ja;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -14,11 +11,9 @@ import java.util.Scanner;
 public class ServerItem {
 
     private String hostname, addr, yaml;
-
     private long lastComm;
-
     private ArrayList<Key> keys;
-    
+    private ArrayList<MaintainerObject> maintainers;
     private boolean up;
 
     public ServerItem(String host, String addr) {
@@ -27,50 +22,45 @@ public class ServerItem {
         this.hostname = host;
         this.addr = addr;
         keys = new ArrayList<>();
-        File templatefile = new File("template.yml");
-        String template = "";
+        maintainers = new ArrayList<>();
+    }
+    
+    public boolean fetchMaintainers() {
+        File mainfile = new File("servers/" + hostname + ".txt");
+        if(!mainfile.exists()) {
+            return false;
+        }
+        String first, last, email, cell;
         try {
-            Scanner reader = new Scanner(templatefile);
-            String read = "";
-            while (reader.hasNextLine()) {
-                read += reader.nextLine();
+            Scanner reader = new Scanner(mainfile);
+            if(reader.hasNextLine()) {
+                first = reader.nextLine();
+            }else{
+                return false;
             }
-            template = read;
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-        }
-        File file = new File("servers/" + host + ".yml");
-        if (!file.exists()) {
-            if(!(new File("servers")).exists()) {
-                createServerDirectory();
+            if(reader.hasNextLine()) {
+                last = reader.nextLine();
+            }else{
+                return false;
             }
-            System.out.println("Generating YAML for " + host);
-            try {
-                file.createNewFile();
-                PrintStream out = new PrintStream(file);
-                out.println(template);
-                out.close();
-            } catch (IOException ex) {
-                System.out.println("Error creating " + file.getAbsolutePath());
+            if(reader.hasNextLine()) {
+                email = reader.nextLine();
+            }else{
+                maintainers.add(new MaintainerObject(first, last));
+                return true;
             }
-        } else {
-            System.out.println("Found YAML for " + host);
-        }
-        File yamlf = new File("servers/" + host + ".yml");
-        try {
-            Scanner reader = new Scanner(yamlf);
-            String read = "";
-            while (reader.hasNextLine()) {
-                read += reader.nextLine();
+            if(reader.hasNextLine()) {
+                cell = reader.nextLine();
+            }else{
+                maintainers.add(new MaintainerObject(first, last, email));
+                return true;
             }
-            yaml = read;
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
+            maintainers.add(new MaintainerObject(first, last, email, cell));
+            return true;
+        }catch (Exception e) {
+            System.out.println("Could not open maintainers file for " + hostname + ".");
         }
-        keys = YamlOperator.readKeys(yaml);
-        for (Key k : keys) {
-            System.out.println("Server: " + host + "Key: " + k.getKeyName() + " Value: " + k.getKeyValue());
-        }
+        return false;
     }
 
     public String getName() {
@@ -135,13 +125,5 @@ public class ServerItem {
     
     public void up(boolean now) {
         this.up = now;
-    }
-    
-    private void createServerDirectory() {
-        try {
-            Runtime.getRuntime().exec("mkdir servers").waitFor();
-        } catch (Exception ex) {
-            System.out.println("Could not make servers directory");
-        }
     }
 }
