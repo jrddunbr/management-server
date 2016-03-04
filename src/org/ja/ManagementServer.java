@@ -462,9 +462,10 @@ public class ManagementServer {
                 }
                 output += ">";
                 output += k.getKeyValue();
-                output += "</td></tr></table>";
+                output += "</td></tr>";
             }
         }
+        output += "</table>";
         return output;
     }
 
@@ -501,9 +502,10 @@ public class ManagementServer {
                 } else {
                     output += host.getKey("uptime");
                 }
-                output += "</td></tr></table>";
+                output += "</td></tr>";
             }
         }
+        output += "</table>";
         return output;
     }
 }
