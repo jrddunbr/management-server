@@ -10,11 +10,13 @@ import java.util.Scanner;
  */
 public class ServerItem {
 
-    private String hostname, addr, yaml;
+    private final String hostname, addr;
+    private String yaml;
     private long lastComm;
-    private ArrayList<Key> keys;
-    private ArrayList<MaintainerObject> maintainers;
+    private final ArrayList<Key> keys;
+    private final ArrayList<MaintainerObject> maintainers;
     private boolean up;
+    private String htmlString = "";
 
     public ServerItem(String host, String addr) {
         up = false;
@@ -125,5 +127,13 @@ public class ServerItem {
     
     public void up(boolean now) {
         this.up = now;
+    }
+    
+    public void setHTMLString(String html) {
+        htmlString = html;
+    }
+    
+    public String getHtML() {
+        return htmlString;
     }
 }

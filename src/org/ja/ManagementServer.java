@@ -16,7 +16,7 @@ import java.util.Scanner;
 public class ManagementServer {
 
     private static String html = "";
-    private static String server = "";
+    private static String serverhtml = "";
     private static final ArrayList<String> servers = new ArrayList<>();
     private static final ArrayList<ServerItem> hosts = new ArrayList<>();
     private static ArrayList<Key> masterKey = new ArrayList<>();
@@ -27,6 +27,8 @@ public class ManagementServer {
     private static final String CriticalColor = "#cc0000";
     private static final String LightGoodColor = "#CDF1A7";
     private static final String LightBadColor = "#FFC299";
+    private static double ramPercent, cpuPercent;
+    private static String htmlOutput = "";
 
     /**
      *
@@ -45,8 +47,8 @@ public class ManagementServer {
         System.out.println("Printing Master Keys:");
         printMasterKeys();
         importZones();
+        htmlOutput = "";
         Thread serverthread = new Thread(new Runnable() {
-
             @Override
             public void run() {
                 server();
@@ -54,12 +56,11 @@ public class ManagementServer {
         });
         serverthread.start();
         Thread updateThread = new Thread(new Runnable() {
-
             @Override
             public void run() {
                 while (true) {
                     try {
-                        Thread.sleep(20000);
+                        Thread.sleep(1000);
                     } catch (InterruptedException ex) {
                     }
                     readBaseHTML();
@@ -67,6 +68,7 @@ public class ManagementServer {
                     for (ServerItem i : hosts) {
                         i.up(Math.abs(i.lastComm() - System.currentTimeMillis()) < 120000);
                     }
+                    updateHTML();
                 }
             }
         });
@@ -137,8 +139,8 @@ public class ManagementServer {
             while (reader.hasNextLine()) {
                 read += reader.nextLine();
             }
-            if (!server.equals(read)) {
-                server = read;
+            if (!serverhtml.equals(read)) {
+                serverhtml = read;
                 System.out.println("Updated Server HTML Template");
             }
         } catch (FileNotFoundException ex) {
@@ -281,6 +283,13 @@ public class ManagementServer {
             System.out.println("ShowList: " + s);
         }
     }
+    
+    private static void updateHTML() {
+        for(ServerItem server : hosts) {
+            generateServerOutput(server);
+        }
+        generateMainOutput();
+    }
 
     private static void server() {
         ServerSocket socket;
@@ -336,128 +345,42 @@ public class ManagementServer {
                             }
                         }
 
-                        String output;
+                        String css = "";
+                        String output = "";
                         if (isServer) {
-                            String css = "";
-                            String name = ser.getName();
-                            String addr = ser.getAddress();
+                            output = serverhtml.replace("CONTENT", generateServerOutput(ser));
                             String color = BadColor;
                             if (ser.up()) {
                                 color = GoodColor;
                             }
-                            int header = server.indexOf("<h1>") + 4;
-                            output = server.substring(0, header);
                             output = output.replaceFirst("BGCOLOR", color);
-                            output += name;
-                            int table = server.indexOf("<table>") + 7;
-                            output += server.substring(header, table);
-                            output += "<tr><td class=\"thead\">";
-                            output += name;
-                            output += "</td><td>";
-                            output += addr;
-                            output += "</td></tr>";
-                            if (ser.hasKey("cpu")) {
-                                double cpuPercent = 0.0;
-                                try {
-                                    cpuPercent = Double.parseDouble(ser.getKey("cpu"));
-                                } catch (Exception e) {
-                                }
-                                css += "#cpubar {\n"
-                                        + "background-color: #69c;\n"
-                                        + "width: " + cpuPercent + "%;"
-                                        + "height: 60%;"
-                                        + "border-radius: 4px;\n"
-                                        + "margin-left:5px;margin-right:5px;"
-                                        + "}";
-                                output += "<tr><td>cpu</td><td><div id=\"cpubar\">" + cpuPercent + "%</div></td></tr>";
-                            }
-                            boolean doRam = true;
-                            if(ser.hasKey("total-ram") && ser.hasKey("used-ram")) {
-                                double ramPercent = 0.0;
-                                double ramTotal = 0.0;
-                                double ramUsed = 0.0;
-                                try {
-                                    ramTotal = Double.parseDouble(ser.getKey("total-ram").replaceAll("MB", ""));
-                                    ramUsed = Double.parseDouble(ser.getKey("used-ram").replaceAll("MB", ""));
-                                    ramPercent = ((double)ramUsed / (double)ramTotal) * 100.0;
-                                } catch (Exception e) {
-                                }
-                                css += "#rambar {\n"
-                                        + "background-color: #69c;\n"
-                                        + "width: " + ramPercent + "%;"
-                                        + "height: 60%;"
-                                        + "border-radius: 4px;\n"
-                                        + "margin-left:5px;margin-right:5px;"
-                                        + "}";
-                                output += "<tr><td>ram (total: " + ramTotal + "MB)</td><td><div id=\"rambar\">" + ramUsed + "MB</div></td></tr>";
-                                doRam = false;
-                            }
-                            for (Key k : ser.getKeys()) {
-                                if (!(k.getKeyName().equalsIgnoreCase("cpu") || (k.getKeyName().equalsIgnoreCase("used-ram") && !doRam) || (k.getKeyName().equalsIgnoreCase("total-ram") && !doRam))) {
-                                    output += "<tr><td>";
-                                    output += k.getKeyName();
-                                    output += "</td><td";
-                                    if(k.getKeyValue().equals("running")) {
-                                        output += " class=\"running\" ";
-                                    }
-                                    if(k.getKeyValue().equals("shut off")) {
-                                        output += " class=\"shut_off\" ";
-                                    }
-                                    output += ">";
-                                    output += k.getKeyValue();
-                                    output += "</td></tr>";
-                                }
-                            }
-                            output = output.replaceAll("OCS", css);
+                            css += "#cpubar {\n"
+                                    + "background-color: #69c;\n"
+                                    + "width: " + cpuPercent + "%;"
+                                    + "height: 60%;"
+                                    + "border-radius: 4px;\n"
+                                    + "margin-left:5px;margin-right:5px;"
+                                    + "}";
+                            css += "#rambar {\n"
+                                    + "background-color: #69c;\n"
+                                    + "width: " + ramPercent + "%;"
+                                    + "height: 60%;"
+                                    + "border-radius: 4px;\n"
+                                    + "margin-left:5px;margin-right:5px;"
+                                    + "}";
                         } else {
-                            String css = "";
-                            int table = html.indexOf("<table>") + 7;
-                            output = html.substring(0, table);
+                            output = html.replace("CONTENT", generateMainOutput());
                             output = output.replaceFirst("BGCOLOR", determineColorSeverity());
-                            output += "<tr><td>Server Name</td><td>IP</td><td>Up?</td><td>Uptime</td></tr>";
-                            for (ServerItem host : hosts) {
-                                boolean show = false;
-                                ArrayList<String> showServers = determineServerList();
-                                for (String s : showServers) {
-                                    if (s.equalsIgnoreCase(host.getName())) {
-                                        show = true;
-                                    }
-                                }
-                                if (show) {
-                                    output += "<tr><td><a href=\"";
-                                    output += host.getName();
-                                    output += "\">";
-                                    output += host.getName();
-                                    output += "</a></td><td>";
-                                    output += host.getAddress();
-                                    output += "</td><td";
-                                    if (!host.up()) {
-                                        output += " style=\"background:#ff6600\" ";
-                                    } else {
-                                        output += " style=\"background:#589318\" ";
-                                    }
-                                    output += ">";
-                                    output += host.up();
-                                    output += "</td><td>";
-                                    String uptime = host.getKey("uptime");
-                                    if (uptime.isEmpty()) {
-                                        output += "erg!";
-                                    } else {
-                                        output += host.getKey("uptime");
-                                    }
-                                    output += "</td></tr>";
-                                }
-                                output = output.replaceAll("OCS", css);
-                            }
                         }
+                        output = output.replaceFirst("OCS", css);
 
                         /* 
-                 If we are in the root action directory (or approved directory),
-                 then return some info, otherwise do a 302 redirect to known territory
-                 Typically we leave known territory when making requests, and they
-                 bump us right back to the root thanks to the 302. The browser gives us the
-                 ability to collect data thanks to the redirect since it calls a function
-                 from the path that we specified in the initial redirect link that we click.
+                         If we are in the root action directory (or approved directory),
+                         then return some info, otherwise do a 302 redirect to known territory
+                         Typically we leave known territory when making requests, and they
+                         bump us right back to the root thanks to the 302. The browser gives us the
+                         ability to collect data thanks to the redirect since it calls a function
+                         from the path that we specified in the initial redirect link that we click.
                          */
                         if (path.isEmpty() || isServer) {
                             //basic HTTP response with success. Makes the browser happy.
@@ -492,5 +415,95 @@ public class ManagementServer {
             System.out.println("Error establishing server on port " + port);
             System.exit(1);
         }
+    }
+
+    private static String generateServerOutput(ServerItem server) {
+        String output = "";
+        String name = server.getName();
+        String addr = server.getAddress();
+        output += "<table><tr><td class=\"thead\">";
+        output += name;
+        output += "</td><td>";
+        output += addr;
+        output += "</td></tr>";
+        if (server.hasKey("cpu")) {
+            cpuPercent = 0.0;
+            try {
+                cpuPercent = Double.parseDouble(server.getKey("cpu"));
+            } catch (Exception e) {
+            }
+            output += "<tr><td>cpu</td><td><div id=\"cpubar\">" + cpuPercent + "%</div></td></tr>";
+        }
+        boolean doRam = true;
+        if (server.hasKey("total-ram") && server.hasKey("used-ram")) {
+            ramPercent = 0.0;
+            double ramTotal = 0.0;
+            double ramUsed = 0.0;
+            try {
+                ramTotal = Double.parseDouble(server.getKey("total-ram").replaceAll("MB", ""));
+                ramUsed = Double.parseDouble(server.getKey("used-ram").replaceAll("MB", ""));
+                ramPercent = ((double) ramUsed / (double) ramTotal) * 100.0;
+            } catch (Exception e) {
+            }
+
+            output += "<tr><td>ram (total: " + ramTotal + "MB)</td><td><div id=\"rambar\">" + ramUsed + "MB</div></td></tr>";
+            doRam = false;
+        }
+        for (Key k : server.getKeys()) {
+            if (!(k.getKeyName().equalsIgnoreCase("cpu") || (k.getKeyName().equalsIgnoreCase("used-ram") && !doRam) || (k.getKeyName().equalsIgnoreCase("total-ram") && !doRam))) {
+                output += "<tr><td>";
+                output += k.getKeyName();
+                output += "</td><td";
+                if (k.getKeyValue().equals("running")) {
+                    output += " class=\"running\" ";
+                }
+                if (k.getKeyValue().equals("shut off")) {
+                    output += " class=\"shut_off\" ";
+                }
+                output += ">";
+                output += k.getKeyValue();
+                output += "</td></tr></table>";
+            }
+        }
+        return output;
+    }
+
+    private static String generateMainOutput() {
+        String output = "";
+        output += "<table><tr><td>Server Name</td><td>IP</td><td>Up?</td><td>Uptime</td></tr>";
+        for (ServerItem host : hosts) {
+            boolean show = false;
+            ArrayList<String> showServers = determineServerList();
+            for (String s : showServers) {
+                if (s.equalsIgnoreCase(host.getName())) {
+                    show = true;
+                }
+            }
+            if (show) {
+                output += "<tr><td><a href=\"";
+                output += host.getName();
+                output += "\">";
+                output += host.getName();
+                output += "</a></td><td>";
+                output += host.getAddress();
+                output += "</td><td";
+                if (!host.up()) {
+                    output += " style=\"background:#ff6600\" ";
+                } else {
+                    output += " style=\"background:#589318\" ";
+                }
+                output += ">";
+                output += host.up();
+                output += "</td><td>";
+                String uptime = host.getKey("uptime");
+                if (uptime.isEmpty()) {
+                    output += "erg!";
+                } else {
+                    output += host.getKey("uptime");
+                }
+                output += "</td></tr></table>";
+            }
+        }
+        return output;
     }
 }
