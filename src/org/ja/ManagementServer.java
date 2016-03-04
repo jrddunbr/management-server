@@ -466,8 +466,8 @@ public class ManagementServer {
                 output += "</td></tr>";
             }
         }
-        output += "</table>";
-        output += "<table><thead><td>First</td><td>Last</td><td>Email</td><td>Cell</td></thead>";
+        output += "</table><br/><br/><h2 style=\"text-align:center\">Maintainers:</h2>";
+        output += "<table><tr><td class=\"thead\">First</td><td>Last</td><td>Email</td><td>Cell</td></thead>";
         for(MaintainerObject maintainer : server.getMaintainers()) {
             if(maintainer.getEmail().isEmpty()) {
                 output += "<tr><td>" + 

@@ -26,47 +26,35 @@ public class ServerItem {
         keys = new ArrayList<>();
         maintainers = new ArrayList<>();
     }
-    
+
     public boolean fetchMaintainers() {
         maintainers.clear();
         File mainfile = new File("servers/" + hostname + ".txt");
-        if(!mainfile.exists()) {
+        if (!mainfile.exists()) {
             return false;
         }
         String first, last, email, cell;
         try {
             Scanner reader = new Scanner(mainfile);
-            if(reader.hasNextLine()) {
-                first = reader.nextLine();
-            }else{
-                return false;
+            while (reader.hasNextLine()) {
+                try {
+                    first = reader.nextLine().substring(2);
+                    last = reader.nextLine().substring(2);
+                    email = reader.nextLine().substring(2);
+                    cell = reader.nextLine().substring(2);
+                    maintainers.add(new MaintainerObject(first, last, email, cell));
+                } catch (Exception e) {
+                    
+                }
             }
-            if(reader.hasNextLine()) {
-                last = reader.nextLine();
-            }else{
-                return false;
-            }
-            if(reader.hasNextLine()) {
-                email = reader.nextLine();
-            }else{
-                maintainers.add(new MaintainerObject(first, last));
-                return true;
-            }
-            if(reader.hasNextLine()) {
-                cell = reader.nextLine();
-            }else{
-                maintainers.add(new MaintainerObject(first, last, email));
-                return true;
-            }
-            maintainers.add(new MaintainerObject(first, last, email, cell));
             return true;
-        }catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Could not open maintainers file for " + hostname + ".");
         }
         return false;
     }
-    
-    public ArrayList<MaintainerObject> getMaintainers() {
+
+public ArrayList<MaintainerObject> getMaintainers() {
         return maintainers;
     }
 
@@ -97,47 +85,47 @@ public class ServerItem {
         }
         return "";
     }
-    
+
     public boolean hasKey(String key) {
-        for(Key k : keys) {
-            if(k.getKeyName().equalsIgnoreCase(key)) {
+        for (Key k : keys) {
+            if (k.getKeyName().equalsIgnoreCase(key)) {
                 return true;
             }
         }
         return false;
     }
-    
+
     public ArrayList<Key> getKeys() {
         return keys;
     }
-    
+
     public void lastComm(long now) {
         this.lastComm = now;
     }
-    
+
     public long lastComm() {
         return this.lastComm;
     }
-    
+
     public boolean up() {
         long diff = Math.abs(lastComm - System.currentTimeMillis());
-        if(diff < 60000) {
+        if (diff < 60000) {
             this.up = true;
-        }else{
+        } else {
             this.up = false;
             keys.clear();
         }
         return this.up;
     }
-    
+
     public void up(boolean now) {
         this.up = now;
     }
-    
+
     public void setHTMLString(String html) {
         htmlString = html;
     }
-    
+
     public String getHtML() {
         return htmlString;
     }
