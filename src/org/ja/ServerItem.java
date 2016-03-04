@@ -28,6 +28,7 @@ public class ServerItem {
     }
     
     public boolean fetchMaintainers() {
+        maintainers.clear();
         File mainfile = new File("servers/" + hostname + ".txt");
         if(!mainfile.exists()) {
             return false;
@@ -63,6 +64,10 @@ public class ServerItem {
             System.out.println("Could not open maintainers file for " + hostname + ".");
         }
         return false;
+    }
+    
+    public ArrayList<MaintainerObject> getMaintainers() {
+        return maintainers;
     }
 
     public String getName() {

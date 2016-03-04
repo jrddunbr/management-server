@@ -67,6 +67,7 @@ public class ManagementServer {
                     readServerHTML();
                     for (ServerItem i : hosts) {
                         i.up(Math.abs(i.lastComm() - System.currentTimeMillis()) < 120000);
+                        i.fetchMaintainers();
                     }
                     updateHTML();
                 }
@@ -466,6 +467,25 @@ public class ManagementServer {
             }
         }
         output += "</table>";
+        output += "<table><thead><td>First</td><td>Last</td><td>Email</td><td>Cell</td></thead>";
+        for(MaintainerObject maintainer : server.getMaintainers()) {
+            if(maintainer.getEmail().isEmpty()) {
+                output += "<tr><td>" + 
+                        maintainer.getFirst() + "</td><td>" + 
+                        maintainer.getLast() + "</td></tr>";
+            }else if(maintainer.getCell().isEmpty()) {
+                output += "<tr><td>" + 
+                        maintainer.getFirst() + "</td><td>" + 
+                        maintainer.getLast() + "</td><td>" + 
+                        maintainer.getEmail() + "</td></tr>";
+            }else{
+                output += "<tr><td>" + 
+                        maintainer.getFirst() + "</td><td>" + 
+                        maintainer.getLast() + "</td><td>" + 
+                        maintainer.getEmail() + "</td><td>" + 
+                        maintainer.getCell() + "</td></tr>";
+            }
+        }
         return output;
     }
 
