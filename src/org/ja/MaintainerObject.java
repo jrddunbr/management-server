@@ -7,16 +7,8 @@ package org.ja;
  */
 public class MaintainerObject {
     
-    private String maintainerFirstName, maintainerLastName, maintainerEmail, maintainerCell;
-    
-    public MaintainerObject(String first, String last) {
-        maintainerFirstName = first;
-        maintainerLastName = last;
-        maintainerEmail = "";
-        maintainerCell = "";
-    }
-    
-    public MaintainerObject(String first, String last, String email) {
+    private final String maintainerFirstName, maintainerLastName, maintainerEmail, maintainerCell, maintainerIRC;
+    public MaintainerObject(String first, String last, String email, String cell, String irc) {
         maintainerFirstName = first;
         maintainerLastName = last;
         if(!email.isEmpty()) {
@@ -24,16 +16,10 @@ public class MaintainerObject {
         }else{
             maintainerEmail = "";
         }
-        maintainerCell = "";
-    }
-    
-    public MaintainerObject(String first, String last, String email, String cell) {
-        maintainerFirstName = first;
-        maintainerLastName = last;
-        if(!email.isEmpty()) {
-            maintainerEmail = email;
+        if(!irc.isEmpty()) {
+            maintainerIRC = irc;
         }else{
-            maintainerEmail = "";
+            maintainerIRC = "";
         }
         if(!cell.isEmpty()) {
             maintainerCell = cell;
@@ -56,5 +42,9 @@ public class MaintainerObject {
     
     public String getCell() {
         return maintainerCell;
+    }
+    
+    public String getIRC() {
+        return maintainerIRC;
     }
 }

@@ -33,7 +33,7 @@ public class ServerItem {
         if (!mainfile.exists()) {
             return false;
         }
-        String first, last, email, cell;
+        String first, last, email, cell, irc;
         try {
             Scanner reader = new Scanner(mainfile);
             while (reader.hasNextLine()) {
@@ -41,8 +41,9 @@ public class ServerItem {
                     first = reader.nextLine().substring(2);
                     last = reader.nextLine().substring(2);
                     email = reader.nextLine().substring(2);
+                    irc = reader.nextLine().substring(2);
                     cell = reader.nextLine().substring(2);
-                    maintainers.add(new MaintainerObject(first, last, email, cell));
+                    maintainers.add(new MaintainerObject(first, last, email, cell, irc));
                 } catch (Exception e) {
                     
                 }

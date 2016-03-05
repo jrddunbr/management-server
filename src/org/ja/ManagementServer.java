@@ -467,25 +467,37 @@ public class ManagementServer {
             }
         }
         output += "</table><br/><br/><h2 style=\"text-align:center\">Maintainers:</h2>";
-        output += "<table><tr><td class=\"thead\">First</td><td>Last</td><td>Email</td><td>Cell</td></thead>";
+        output += "<table><tr><td class=\"thead\">First</td><td>Last</td><td>Email</td><td>IRC</td><td>Cell</td></thead>";
         for(MaintainerObject maintainer : server.getMaintainers()) {
-            if(maintainer.getEmail().isEmpty()) {
-                output += "<tr><td>" + 
-                        maintainer.getFirst() + "</td><td>" + 
-                        maintainer.getLast() + "</td></tr>";
-            }else if(maintainer.getCell().isEmpty()) {
-                output += "<tr><td>" + 
-                        maintainer.getFirst() + "</td><td>" + 
-                        maintainer.getLast() + "</td><td>" + 
-                        maintainer.getEmail() + "</td></tr>";
+            output += "<tr>";
+            if(maintainer.getFirst().isEmpty()) {
+                output += "<td>&nbsp;</td>";
             }else{
-                output += "<tr><td>" + 
-                        maintainer.getFirst() + "</td><td>" + 
-                        maintainer.getLast() + "</td><td>" + 
-                        maintainer.getEmail() + "</td><td>" + 
-                        maintainer.getCell() + "</td></tr>";
+                output += "<td>" + maintainer.getFirst() + "</td>";
             }
+            if(maintainer.getLast().isEmpty()) {
+                output += "<td>&nbsp;</td>";
+            }else{
+                output += "<td>" + maintainer.getLast()+ "</td>";
+            }
+            if(maintainer.getEmail().isEmpty()) {
+                output += "<td>&nbsp;</td>";
+            }else{
+                output += "<td>" + maintainer.getEmail()+ "</td>";
+            }
+            if(maintainer.getIRC().isEmpty()) {
+                output += "<td>&nbsp;</td>";
+            }else{
+                output += "<td>" + maintainer.getIRC()+ "</td>";
+            }
+            if(maintainer.getCell().isEmpty()) {
+                output += "<td>&nbsp;</td>";
+            }else{
+                output += "<td>" + maintainer.getCell()+ "</td>";
+            }
+            output += "</tr>";
         }
+        output += "</table>";
         return output;
     }
 
