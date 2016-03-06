@@ -53,7 +53,7 @@ public class BatteryBackupObject {
      * @param percentage battery level percentage
      */
     public void setBattery(double percentage) {
-        if(!(percentage > 100.0 || percentage < 0.0)) {
+        if(!(percentage < 100.0 || percentage > 0.0)) {
             percentFull = percentage;
         }
     }
