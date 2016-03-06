@@ -106,7 +106,7 @@ public class BatteryBackupObject {
      */
     @Override
     public String toString() {
-        return ID + " " + percentFull + timeLeft;
+        return ID + " " + percentFull + " " + timeLeft;
     }
 }
 
