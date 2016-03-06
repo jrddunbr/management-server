@@ -77,8 +77,6 @@ public class BatteryBackupObject {
     }
     
     /** Should we recommend shutdowns on this particular battery backup?
-     * 
-     * Note - This method will be very powerful if true! Do not accidentally call this!
      *
      * @return True if we recommend shutdowns now, otherwise false
      */
