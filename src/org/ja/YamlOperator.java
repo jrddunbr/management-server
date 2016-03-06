@@ -9,6 +9,11 @@ import java.util.Scanner;
  */
 public class YamlOperator {
 
+    /**
+     *
+     * @param yaml
+     * @return
+     */
     public static ArrayList<Key> readKeys(String yaml) {
         ArrayList<Key> keys = new ArrayList<>();
         int keysStart = yaml.indexOf("keys:") + 6;
@@ -34,6 +39,11 @@ public class YamlOperator {
         return keys;
     }
 
+    /**
+     *
+     * @param keys
+     * @return
+     */
     public static String makeKeys(ArrayList<Key> keys) {
         String ret = "keys:\n";
         for (Key k : keys) {
@@ -42,6 +52,11 @@ public class YamlOperator {
         return ret;
     }
 
+    /**
+     *
+     * @param yaml
+     * @return
+     */
     public static String removeKeys(String yaml) {
         int keysStart = yaml.indexOf("keys:");
         Scanner reader = new Scanner(yaml.substring(keysStart + 6, yaml.length()));

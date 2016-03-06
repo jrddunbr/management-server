@@ -8,6 +8,15 @@ package org.ja;
 public class MaintainerObject {
     
     private final String maintainerFirstName, maintainerLastName, maintainerEmail, maintainerCell, maintainerIRC;
+
+    /**
+     *
+     * @param first
+     * @param last
+     * @param email
+     * @param cell
+     * @param irc
+     */
     public MaintainerObject(String first, String last, String email, String cell, String irc) {
         maintainerFirstName = first;
         maintainerLastName = last;
@@ -28,22 +37,42 @@ public class MaintainerObject {
         }
     }
     
+    /**
+     *
+     * @return
+     */
     public String getFirst() {
         return maintainerFirstName;
     }
     
+    /**
+     *
+     * @return
+     */
     public String getLast() {
         return maintainerLastName;
     }
     
+    /**
+     *
+     * @return
+     */
     public String getEmail() {
         return maintainerEmail;
     }
     
+    /**
+     *
+     * @return
+     */
     public String getCell() {
         return maintainerCell;
     }
     
+    /**
+     *
+     * @return
+     */
     public String getIRC() {
         return maintainerIRC;
     }

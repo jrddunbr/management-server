@@ -8,6 +8,11 @@ import java.util.ArrayList;
  * @author jared
  */
 public class YamlOperatorTester {
+
+    /**
+     *
+     * @param args
+     */
     public static void main(String[] args) {
         String sampleYaml = "la:\nkeys:\n    weee: yay!\n    Woo!: yipee!\nother:\n";
         ArrayList<Key> keys;
