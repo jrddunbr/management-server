@@ -572,8 +572,8 @@ public class ManagementServer {
             }else{
                 output += "UPS " + upsnum;
             }
-            output += "</td><td>";
-            output += b.getSerial();
+            //output += "</td><td>";
+            //output += b.getSerial();
             output += "</td><td>";
             output += b.getBatteryLevel();
             output += "</td><td>";
