@@ -29,12 +29,14 @@ public class ManagementServer {
     private static final String LightBadColor = "#FFC299";
     private static double ramPercent, cpuPercent;
     private static String htmlOutput = "";
+    private static ArrayList<BatteryBackupObject> batteries;
 
     /**
      *
      * @param args
      */
     public static void main(String[] args) {
+        batteries = BatteryBackups.initUPS();
         readBaseHTML();
         readServerHTML();
         getServers();
@@ -63,6 +65,7 @@ public class ManagementServer {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
                     }
+                    BatteryBackups.updateUPS(batteries);
                     readBaseHTML();
                     readServerHTML();
                     for (ServerItem i : hosts) {
@@ -290,6 +293,25 @@ public class ManagementServer {
             generateServerOutput(server);
         }
         generateMainOutput();
+    }
+    
+    private static int serialToUPS(String serial) {
+        switch (serial) {
+            case "3B1334X11500": 
+                return 1;
+            case "3B1334X11460":
+                return 2;
+            case "4B1520P48994":
+                return 3;
+            case "4B1520P48989":
+                return 4;
+            case "4B1520P48959":
+                return 5;
+            case "4B1529P21445":
+                return 6;
+            default:
+                return -1;
+        }
     }
 
     private static void server() {
@@ -536,6 +558,27 @@ public class ManagementServer {
                 }
                 output += "</td></tr>";
             }
+        }
+        output += "</table>";
+        output += "<br/><br/>";
+        output += "<table>";
+        output += "<tr><td class=\"thead\">"
+                + "UPS #</td><td>Serial #</td><td>Battery Percentage</td><td>Time Left on Battery</td></tr>";
+        for(BatteryBackupObject b:batteries) {
+            output += "<tr><td>";
+            int upsnum = serialToUPS(b.getSerial());
+            if(upsnum == -1) {
+                output += "Unidentified UPS";
+            }else{
+                output += "UPS " + upsnum;
+            }
+            output += "</td><td>";
+            output += b.getSerial();
+            output += "</td><td>";
+            output += b.getBatteryLevel();
+            output += "</td><td>";
+            output += b.getTimeLeft();
+            output += "</td></tr>";
         }
         output += "</table>";
         return output;

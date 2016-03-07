@@ -23,7 +23,7 @@ public class BatteryBackupObject {
         percentFull = 0.0;
         timeLeft = "";
     }
-    
+
     /** Set the time left on the battery backup
      *
      * @param left time left string
