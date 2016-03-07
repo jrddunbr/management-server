@@ -53,9 +53,7 @@ public class BatteryBackupObject {
      * @param percentage battery level percentage
      */
     public void setBattery(double percentage) {
-        if(!(percentage < 100.0 || percentage > 0.0)) {
-            percentFull = percentage;
-        }
+        percentFull = percentage;
     }
     
     /** Set if the battery backup is connected to line voltage
@@ -106,7 +104,7 @@ public class BatteryBackupObject {
      */
     @Override
     public String toString() {
-        return ID + " " + percentFull + " " + timeLeft;
+        return ID + ", " + percentFull + ", " + timeLeft;
     }
 }
 
