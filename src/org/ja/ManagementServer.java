@@ -563,7 +563,7 @@ public class ManagementServer {
         output += "<br/><br/>";
         output += "<table>";
         output += "<tr><td class=\"thead\">"
-                + "UPS #</td><td>Serial #</td><td>Battery Percentage</td><td>Time Left on Battery</td></tr>";
+                + "UPS #</td><td>Battery Percentage</td><td>Time Left on Battery</td></tr>";
         for(BatteryBackupObject b:batteries) {
             output += "<tr><td>";
             int upsnum = serialToUPS(b.getSerial());
