@@ -444,7 +444,7 @@ public class ManagementServer {
         String output = "";
         String name = server.getName();
         String addr = server.getAddress();
-        output += "<table><tr><td class=\"thead\">";
+        output += "<table class="table"><tr><td class=\"thead\">";
         output += name;
         output += "</td><td>";
         output += addr;
@@ -489,7 +489,7 @@ public class ManagementServer {
             }
         }
         output += "</table><br/><br/><h2 style=\"text-align:center\">Maintainers:</h2>";
-        output += "<table><tr><td class=\"thead\">First</td><td>Last</td><td>Email</td><td>IRC</td><td>Cell</td></thead>";
+        output += "<table class="table"><tr><td class=\"thead\">First</td><td>Last</td><td>Email</td><td>IRC</td><td>Cell</td></thead>";
         for(MaintainerObject maintainer : server.getMaintainers()) {
             output += "<tr>";
             if(maintainer.getFirst().isEmpty()) {
@@ -525,7 +525,7 @@ public class ManagementServer {
 
     private static String generateMainOutput() {
         String output = "";
-        output += "<table><tr><td>Server Name</td><td>IP</td><td>Up?</td><td>Uptime</td></tr>";
+        output += "<table class="table"><tr><td>Server Name</td><td>IP</td><td>Up?</td><td>Uptime</td></tr>";
         for (ServerItem host : hosts) {
             boolean show = false;
             ArrayList<String> showServers = determineServerList();
@@ -561,7 +561,7 @@ public class ManagementServer {
         }
         output += "</table>";
         output += "<br/><br/>";
-        output += "<table>";
+        output += "<table class="table">";
         output += "<tr><td class=\"thead\">"
                 + "UPS #</td><td>Battery Percentage</td><td>Time Left on Battery</td></tr>";
         for(BatteryBackupObject b:batteries) {
