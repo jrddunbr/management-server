@@ -543,9 +543,9 @@ public class ManagementServer {
                 output += host.getAddress();
                 output += "</td><td";
                 if (!host.up()) {
-                    output += " style=\"background:#ff6600\" ";
+                    output += " style=\"background:#FFC299\" ";
                 } else {
-                    output += " style=\"background:#589318\" ";
+                    output += " style=\"background:#CDF1A7\" ";
                 }
                 output += ">";
                 output += host.up();
