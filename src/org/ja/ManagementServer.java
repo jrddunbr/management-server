@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ public class ManagementServer {
     private static double ramPercent, cpuPercent;
     private static String htmlOutput = "";
     private static ArrayList<BatteryBackupObject> batteries;
+    private static ArrayList<Inet4Address> nets;
 
     /**
      *
@@ -37,6 +40,7 @@ public class ManagementServer {
      */
     public static void main(String[] args) {
         batteries = BatteryBackups.initUPS();
+        nets = new ArrayList<>();
         readBaseHTML();
         readServerHTML();
         getServers();
@@ -48,7 +52,6 @@ public class ManagementServer {
         }
         System.out.println("Printing Master Keys:");
         printMasterKeys();
-        importZones();
         htmlOutput = "";
         Thread serverthread = new Thread(new Runnable() {
             @Override
@@ -152,34 +155,51 @@ public class ManagementServer {
         }
     }
 
-    private static void getServers() {
-        try {
-            File file = new File("db.cslabs");
-            file.delete();
-            try {
-                Runtime.getRuntime().exec("wget --no-check-certificate https://talos.cslabs.clarkson.edu/db.cslabs").waitFor();
-            } catch (IOException | InterruptedException ex) {
-            }
-            while (!file.canRead()) {
-            }
-            String read;
-            Scanner reader = new Scanner(file);
-            while (reader.hasNextLine()) {
-                read = reader.nextLine();
-                read = read.trim();
-                if (read.length() > 1) {
-                    char first = read.charAt(0);
+    /*    private static void getServersOld() {
+     try {
+     File file = new File("db.cslabs");
+     file.delete();
+     try {
+     Runtime.getRuntime().exec("wget --no-check-certificate https://talos.cslabs.clarkson.edu/db.cslabs").waitFor();
+     } catch (IOException | InterruptedException ex) {
+     }
+     while (!file.canRead()) {
+     }
+     String read;
+     Scanner reader = new Scanner(file);
+     while (reader.hasNextLine()) {
+     read = reader.nextLine();
+     read = read.trim();
+     if (read.length() > 1) {
+     char first = read.charAt(0);
 
-                    if (Character.isAlphabetic(first) && read.contains("IN A")) {
-                        int end = read.indexOf('\t');
-                        int begin = read.indexOf("IN A") + 4;
-                        String host = read.substring(0, end);
-                        servers.add(host);
-                    }
-                }
+     if (Character.isAlphabetic(first) && read.contains("IN A")) {
+     int end = read.indexOf('\t');
+     int begin = read.indexOf("IN A") + 4;
+     String host = read.substring(0, end);
+     servers.add(host);
+     }
+     }
+     }
+     } catch (FileNotFoundException ex) {
+     ex.printStackTrace();
+     }
+     }*/
+    public static void getServers() {
+        nets.clear();
+        try {
+            Scanner reader = new Scanner(new File("networks.txt"));
+            while (reader.hasNextLine()) {
+                boolean subtract = false;
+                boolean subnet = false;
+                String line = reader.nextLine();
+                String[] split = line.split(":");
+                nets.add((Inet4Address) Inet4Address.getByName(split[1]));
+                hosts.add(new ServerItem(split[0], split[1]));
             }
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            System.out.println("Error, could not read networks.txt to recieve server addresses or names.");
+            System.exit(1);
         }
     }
 
@@ -232,42 +252,41 @@ public class ManagementServer {
         }
     }
 
-    private static void importZones() {
-        try {
-            File file = new File("db.cslabs");
-            file.delete();
-            try {
-                Runtime.getRuntime().exec("wget --no-check-certificate https://talos.cslabs.clarkson.edu/db.cslabs").waitFor();
-            } catch (IOException | InterruptedException ex) {
-            }
-            while (!file.canRead()) {
-            }
-            {
+    /*    private static void importZones() {
+     try {
+     File file = new File("db.cslabs");
+     file.delete();
+     try {
+     Runtime.getRuntime().exec("wget --no-check-certificate https://talos.cslabs.clarkson.edu/db.cslabs").waitFor();
+     } catch (IOException | InterruptedException ex) {
+     }
+     while (!file.canRead()) {
+     }
+     {
 
-            }
-            String read;
-            Scanner reader = new Scanner(file);
-            while (reader.hasNextLine()) {
-                read = reader.nextLine();
-                read = read.trim();
-                if (read.length() > 1) {
-                    char first = read.charAt(0);
+     }
+     String read;
+     Scanner reader = new Scanner(file);
+     while (reader.hasNextLine()) {
+     read = reader.nextLine();
+     read = read.trim();
+     if (read.length() > 1) {
+     char first = read.charAt(0);
 
-                    if (Character.isAlphabetic(first) && read.contains("IN A")) {
-                        int end = read.indexOf('\t');
-                        int begin = read.indexOf("IN A") + 4;
-                        String host = read.substring(0, end);
-                        String addr = read.substring(begin, read.length()).trim();
-                        ServerItem item = new ServerItem(host, addr);
-                        hosts.add(item);
-                    }
-                }
-            }
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-        }
-    }
-
+     if (Character.isAlphabetic(first) && read.contains("IN A")) {
+     int end = read.indexOf('\t');
+     int begin = read.indexOf("IN A") + 4;
+     String host = read.substring(0, end);
+     String addr = read.substring(begin, read.length()).trim();
+     ServerItem item = new ServerItem(host, addr);
+     hosts.add(item);
+     }
+     }
+     }
+     } catch (FileNotFoundException ex) {
+     ex.printStackTrace();
+     }
+     }*/
     private static ArrayList<String> determineServerList() {
         ArrayList<String> showList = new ArrayList<>();
         for (Key k : masterKey) {
@@ -287,17 +306,17 @@ public class ManagementServer {
             System.out.println("ShowList: " + s);
         }
     }
-    
+
     private static void updateHTML() {
-        for(ServerItem server : hosts) {
+        for (ServerItem server : hosts) {
             generateServerOutput(server);
         }
         generateMainOutput();
     }
-    
+
     private static int serialToUPS(String serial) {
         switch (serial) {
-            case "3B1334X11500": 
+            case "3B1334X11500":
                 return 1;
             case "3B1334X11460":
                 return 2;
@@ -322,11 +341,10 @@ public class ManagementServer {
             //made a server, let's get the clients.
             while (true) {
                 try {
-                    boolean isServerRoom = false;
+                    boolean inServerRoom = false;
                     Socket accept = socket.accept();
-                    byte[] client = accept.getLocalAddress().getAddress();
-                    if ((client[0] == 128) && (client[1] == 153) && (client[2] == 145)) {
-                        isServerRoom = true;
+                    if(nets.contains((Inet4Address) accept.getLocalAddress())) {
+                        inServerRoom = true;
                     }
                     Scanner in = new Scanner(accept.getInputStream());
                     PrintStream out = new PrintStream(accept.getOutputStream());
@@ -347,8 +365,7 @@ public class ManagementServer {
                             //System.out.println(mode + " " + path);
                         }
 
-                        //checks the origin location to see if it's on the *.145.*
-                        if (accept.getInetAddress().getAddress()[2] == -111) {
+                        if (inServerRoom) {
                             for (ServerItem i : hosts) {
                                 if (i.getAddress().equals(accept.getInetAddress().getHostAddress())) {
                                     String[] parts = path.split("/");
@@ -369,7 +386,7 @@ public class ManagementServer {
                         }
 
                         String css = "";
-                        String output = "";
+                        String output;
                         if (isServer) {
                             output = serverhtml.replace("CONTENT", generateServerOutput(ser));
                             String color = BadColor;
@@ -490,32 +507,32 @@ public class ManagementServer {
         }
         output += "</table><br/><br/><h2 style=\"text-align:center\">Maintainers:</h2>";
         output += "<table><tr><td class=\"thead\">First</td><td>Last</td><td>Email</td><td>IRC</td><td>Cell</td></thead>";
-        for(MaintainerObject maintainer : server.getMaintainers()) {
+        for (MaintainerObject maintainer : server.getMaintainers()) {
             output += "<tr>";
-            if(maintainer.getFirst().isEmpty()) {
+            if (maintainer.getFirst().isEmpty()) {
                 output += "<td>&nbsp;</td>";
-            }else{
+            } else {
                 output += "<td>" + maintainer.getFirst() + "</td>";
             }
-            if(maintainer.getLast().isEmpty()) {
+            if (maintainer.getLast().isEmpty()) {
                 output += "<td>&nbsp;</td>";
-            }else{
-                output += "<td>" + maintainer.getLast()+ "</td>";
+            } else {
+                output += "<td>" + maintainer.getLast() + "</td>";
             }
-            if(maintainer.getEmail().isEmpty()) {
+            if (maintainer.getEmail().isEmpty()) {
                 output += "<td>&nbsp;</td>";
-            }else{
-                output += "<td>" + maintainer.getEmail()+ "</td>";
+            } else {
+                output += "<td>" + maintainer.getEmail() + "</td>";
             }
-            if(maintainer.getIRC().isEmpty()) {
+            if (maintainer.getIRC().isEmpty()) {
                 output += "<td>&nbsp;</td>";
-            }else{
-                output += "<td>" + maintainer.getIRC()+ "</td>";
+            } else {
+                output += "<td>" + maintainer.getIRC() + "</td>";
             }
-            if(maintainer.getCell().isEmpty()) {
+            if (maintainer.getCell().isEmpty()) {
                 output += "<td>&nbsp;</td>";
-            }else{
-                output += "<td>" + maintainer.getCell()+ "</td>";
+            } else {
+                output += "<td>" + maintainer.getCell() + "</td>";
             }
             output += "</tr>";
         }
@@ -564,12 +581,12 @@ public class ManagementServer {
         output += "<table>";
         output += "<tr><td class=\"thead\">"
                 + "UPS #</td><td>Battery Percentage</td><td>Time Left on Battery</td></tr>";
-        for(BatteryBackupObject b:batteries) {
+        for (BatteryBackupObject b : batteries) {
             output += "<tr><td>";
             int upsnum = serialToUPS(b.getSerial());
-            if(upsnum == -1) {
+            if (upsnum == -1) {
                 output += "Unidentified UPS";
-            }else{
+            } else {
                 output += "UPS " + upsnum;
             }
             //output += "</td><td>";
