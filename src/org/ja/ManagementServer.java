@@ -2,10 +2,8 @@ package org.ja;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -154,37 +152,7 @@ public class ManagementServer {
             ex.printStackTrace();
         }
     }
-
-    /*    private static void getServersOld() {
-     try {
-     File file = new File("db.cslabs");
-     file.delete();
-     try {
-     Runtime.getRuntime().exec("wget --no-check-certificate https://talos.cslabs.clarkson.edu/db.cslabs").waitFor();
-     } catch (IOException | InterruptedException ex) {
-     }
-     while (!file.canRead()) {
-     }
-     String read;
-     Scanner reader = new Scanner(file);
-     while (reader.hasNextLine()) {
-     read = reader.nextLine();
-     read = read.trim();
-     if (read.length() > 1) {
-     char first = read.charAt(0);
-
-     if (Character.isAlphabetic(first) && read.contains("IN A")) {
-     int end = read.indexOf('\t');
-     int begin = read.indexOf("IN A") + 4;
-     String host = read.substring(0, end);
-     servers.add(host);
-     }
-     }
-     }
-     } catch (FileNotFoundException ex) {
-     ex.printStackTrace();
-     }
-     }*/
+    
     public static void getServers() {
         nets.clear();
         try {
@@ -252,41 +220,6 @@ public class ManagementServer {
         }
     }
 
-    /*    private static void importZones() {
-     try {
-     File file = new File("db.cslabs");
-     file.delete();
-     try {
-     Runtime.getRuntime().exec("wget --no-check-certificate https://talos.cslabs.clarkson.edu/db.cslabs").waitFor();
-     } catch (IOException | InterruptedException ex) {
-     }
-     while (!file.canRead()) {
-     }
-     {
-
-     }
-     String read;
-     Scanner reader = new Scanner(file);
-     while (reader.hasNextLine()) {
-     read = reader.nextLine();
-     read = read.trim();
-     if (read.length() > 1) {
-     char first = read.charAt(0);
-
-     if (Character.isAlphabetic(first) && read.contains("IN A")) {
-     int end = read.indexOf('\t');
-     int begin = read.indexOf("IN A") + 4;
-     String host = read.substring(0, end);
-     String addr = read.substring(begin, read.length()).trim();
-     ServerItem item = new ServerItem(host, addr);
-     hosts.add(item);
-     }
-     }
-     }
-     } catch (FileNotFoundException ex) {
-     ex.printStackTrace();
-     }
-     }*/
     private static ArrayList<String> determineServerList() {
         ArrayList<String> showList = new ArrayList<>();
         for (Key k : masterKey) {
